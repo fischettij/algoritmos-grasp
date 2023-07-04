@@ -12,7 +12,7 @@ def read_graph(filename):
             matrix.append(row)
         tasks = f.readline()
         tasks = [int(x) for x in tasks.split()]
-    return (matrix,tasks)
+    return (matrix,tasks,num_rows)
 
 def write_graph(filename, nodes):
     matrix = [[str(0) for x in range(nodes)] for y in range(nodes)]

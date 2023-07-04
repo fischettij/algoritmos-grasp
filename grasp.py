@@ -11,8 +11,8 @@ class Solution:
         return f"{self.road}, {self.cost}"
 
 class IterationInfo:
-    def __init__(self, iteration):
-        self.iteration = iteration
+    def __init__(self):
+        self.iteration = 0
         self. greedy_result = 0
         self.local_sarch_result = 0
 
@@ -46,13 +46,16 @@ def grasp(matrix: List[List[int]], cost_of_tasks: List[int], iterations: int, se
     Returns:
         Solution: is the hamiltonian path with its cost
     """
+    print(f"grasp_iteration, best_solution_cost")
     best_solution = _greedy(matrix, selection(4, 5))
     best_solution = _local_search(matrix, best_solution, local_search_time_out)
-    for i in range(iterations - 1):
+    print(f"0, {best_solution.cost}")
+    for i in range(1,iterations):
         solution = _greedy(matrix, selection_strategy)
         solution = _local_search(matrix, solution, local_search_time_out)
         if best_solution.cost > solution.cost:
             best_solution = solution
+        print(f"{i}, {best_solution.cost}")
     best_solution.cost = best_solution.cost + sum(cost_of_tasks)
     return best_solution
 

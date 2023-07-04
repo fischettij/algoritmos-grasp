@@ -23,15 +23,9 @@ if __name__ == "__main__":
     selection_strategy = selection(min_adjacents, target_percent_of_adjacents)
     local_search_time_out = 50
 
+    nodes_amount = graph[2]
+    grasp_time_out = 300
     print(
-        f"Parameters: selection(min={min_adjacents}, target % = {target_percent_of_adjacents}), local search time out: {local_search_time_out} ")
+        f"Parameters: Nodes: {nodes_amount}, selection(min={min_adjacents}, target % = {target_percent_of_adjacents}), grasp time out: {grasp_time_out}, local search time out: {local_search_time_out}")
 
-"""
-    This loop executes grasp multiple times with different number of iterations.
-The idea is to compare the results and evaluate the number of iterations necessary to reach a good result.
-"""
-# executes grasp the summation from 0 to 300 times
-for iterations in range(300):
-    solution = grasp(graph[0], graph[1], iterations,
-                      selection_strategy, local_search_time_out)
-    print(iterations, solution.cost)
+    grasp(graph[0], graph[1], grasp_time_out,selection_strategy, local_search_time_out)
