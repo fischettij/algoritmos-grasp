@@ -1,6 +1,8 @@
 import random
 from re import A
 from typing import List, Callable, Tuple
+from collections import deque
+
 
 class Solution:
     def __init__(self, path, cost):
@@ -9,6 +11,7 @@ class Solution:
 
     def __str__(self):
         return f"{self.road}, {self.cost}"
+
 
 class IterationInfo:
     def __init__(self):
@@ -19,7 +22,9 @@ class IterationInfo:
     def __str__(self):
         return f"{self.iteration}, {self.greedy_result}, {self.local_sarch_result}"
 
+
 Asix = Tuple[int, int, int]
+
 
 def selection(minimum, max_percent):
     def funcion_interna(some_list):
@@ -50,9 +55,9 @@ def grasp(matrix: List[List[int]], cost_of_tasks: List[int], iterations: int, se
     best_solution = _greedy(matrix, selection(4, 5))
     best_solution = _local_search(matrix, best_solution, local_search_time_out)
     print(f"0, {best_solution.cost}")
-    for i in range(1,iterations):
+    for i in range(1, iterations):
         solution = _greedy(matrix, selection_strategy)
-        solution = _local_search(matrix, solution, local_search_time_out)
+        solution = _local_search_neighborhood(matrix, solution, local_search_time_out)
         if best_solution.cost > solution.cost:
             best_solution = solution
         print(f"{i}, {best_solution.cost}")
@@ -102,6 +107,25 @@ def _get_adyecents_not_visited(matrix, node, visiteds):
     return asixs
 
 
+def _local_search_neighborhood(m, solution, time_out_neighbors_search):
+    best_neighbors = solution
+    iterations_without_improvement = 0  # Capacidad máxima de 5 elementos
+    iteration = 0
+    time_out_neighborhood = 300
+    while (iterations_without_improvement < 5 and iteration < time_out_neighborhood) :
+        last_value = best_neighbors.cost
+        best_neighbors = _local_search(m, best_neighbors, time_out_neighbors_search)
+        new_best_value = best_neighbors.cost
+        improvement = ((last_value - new_best_value) / last_value) * 100
+        if improvement < 1:
+            iterations_without_improvement += 1
+        else:
+            ## If i found a good solution then reset the counter
+            iterations_without_improvement = 0
+        iteration += 1
+    return best_neighbors    
+
+
 def _local_search(m, solution, time_out):
     iterations = 0
     new_solution = solution
@@ -137,6 +161,8 @@ def mod_index(index, limit, offset):
     return (index + offset) % limit
 
 # usando divide and conquer
+
+
 def insert_sorted_list(lst: List[Asix], element: Asix):
     left = 0
     right = len(lst) - 1
