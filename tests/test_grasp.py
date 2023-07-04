@@ -1,4 +1,4 @@
-from grasp import Solution, _get_adyecents_not_visited, insert_sorted_list, mod_index, selection, local_search
+from grasp import Solution, _get_adyecents_not_visited, insert_sorted_list, mod_index, selection, _local_search
 
 def test_get_adyecents_not_visited():
     matrix = [
@@ -72,8 +72,8 @@ def test_local_search():
     ]
     cost = 28
     solution = Solution([0,1,2,3,4], cost)
-    new_solution = local_search(m, solution, 1)
-    assert new_solution.road == [1,0,2,3,4]
+    new_solution = _local_search(m, solution, 1)
+    assert new_solution.path == [1,0,2,3,4]
     assert new_solution.cost == 23
 
 def test_insert_sorted_list():
