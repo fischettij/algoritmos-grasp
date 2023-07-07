@@ -1,7 +1,5 @@
 import random
-from re import A
 from typing import List, Callable, Tuple
-from collections import deque
 
 
 class Solution:
@@ -23,6 +21,13 @@ class IterationInfo:
         return f"{self.iteration}, {self.greedy_result}, {self.local_sarch_result}"
 
 
+class LocalSearchParameters:
+    def __init__(self, neighbors_time_out, neighborhood_time_out, neighborhood_witout_improvement_time_out):
+        self.neighbors_time_out = neighbors_time_out
+        self.neighborhood_time_out = neighborhood_time_out
+        self.neighborhood_witout_improvement_time_out = neighborhood_witout_improvement_time_out
+
+
 Asix = Tuple[int, int, int]
 
 
@@ -39,7 +44,7 @@ def selection(minimum, max_percent):
     return funcion_interna
 
 
-def grasp(matrix: List[List[int]], cost_of_tasks: List[int], iterations: int, selection_strategy: Callable = selection(4, 10), local_search_time_out=10):
+def grasp(matrix: List[List[int]], cost_of_tasks: List[int], iterations: int, local_search_parameters: LocalSearchParameters, selection_strategy: Callable = selection(4, 10)):
     """
     Calculate the Hamiltonian circuit and its cost on the "matrix" graph by adding the cost of "cost_of_tasks"
     Args:
@@ -51,16 +56,18 @@ def grasp(matrix: List[List[int]], cost_of_tasks: List[int], iterations: int, se
     Returns:
         Solution: is the hamiltonian path with its cost
     """
-    print(f"grasp_iteration, best_solution_cost")
     best_solution = _greedy(matrix, selection(4, 5))
-    best_solution = _local_search(matrix, best_solution, local_search_time_out)
-    print(f"0, {best_solution.cost}")
+    best_solution = _local_search_neighborhood(
+        matrix, best_solution, local_search_parameters)
+    print(f"best_solution_cost")
+    print(f"{best_solution.cost}")
     for i in range(1, iterations):
         solution = _greedy(matrix, selection_strategy)
-        solution = _local_search_neighborhood(matrix, solution, local_search_time_out)
+        solution = _local_search_neighborhood(
+            matrix, solution, local_search_parameters)
         if best_solution.cost > solution.cost:
             best_solution = solution
-        print(f"{i}, {best_solution.cost}")
+        print(f"{best_solution.cost}")
     best_solution.cost = best_solution.cost + sum(cost_of_tasks)
     return best_solution
 
@@ -107,23 +114,23 @@ def _get_adyecents_not_visited(matrix, node, visiteds):
     return asixs
 
 
-def _local_search_neighborhood(m, solution, time_out_neighbors_search):
+def _local_search_neighborhood(m, solution, local_search_parameters: LocalSearchParameters):
     best_neighbors = solution
     iterations_without_improvement = 0  # Capacidad máxima de 5 elementos
     iteration = 0
-    time_out_neighborhood = 300
-    while (iterations_without_improvement < 5 and iteration < time_out_neighborhood) :
+    while (iterations_without_improvement < local_search_parameters.neighborhood_witout_improvement_time_out and iteration < local_search_parameters.neighborhood_time_out):
         last_value = best_neighbors.cost
-        best_neighbors = _local_search(m, best_neighbors, time_out_neighbors_search)
+        best_neighbors = _local_search(
+            m, best_neighbors, local_search_parameters.neighbors_time_out)
         new_best_value = best_neighbors.cost
         improvement = ((last_value - new_best_value) / last_value) * 100
         if improvement < 1:
             iterations_without_improvement += 1
         else:
-            ## If i found a good solution then reset the counter
+            # If i found a good solution then reset the counter
             iterations_without_improvement = 0
         iteration += 1
-    return best_neighbors    
+    return best_neighbors
 
 
 def _local_search(m, solution, time_out):
@@ -160,10 +167,11 @@ def _local_search(m, solution, time_out):
 def mod_index(index, limit, offset):
     return (index + offset) % limit
 
-# usando divide and conquer
-
 
 def insert_sorted_list(lst: List[Asix], element: Asix):
+    """
+    Using divide and conquer
+    """
     left = 0
     right = len(lst) - 1
     while left <= right:
